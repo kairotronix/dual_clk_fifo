@@ -80,9 +80,6 @@ assign rd_fifo_full_o = (rd_fifo_occupied_o == (DEPTH));
 assign rd_fifo_almost_empty_o = (rd_fifo_occupied_o <= ALMOST_EMPTY_VALUE);
 assign rd_fifo_almost_full_o = (rd_fifo_occupied_o >= ALMOST_FULL_VALUE);
 
-//  Data output assigned at read pointer index. NOTE: This should probably be double-flopped on the user-side?
-assign rd_data_o = mem[rd_pointer[PTR_SIZE-1:0]];
-
 //  Write logic
 integer i;
 always @(posedge wr_clk)
@@ -149,6 +146,7 @@ begin
     if(rd_resetn == '0)
     begin
         rd_pointer <= '0;
+        rd_data_o  <= '0;
     end
     else
     begin
@@ -157,6 +155,9 @@ begin
         begin
             rd_pointer <= rd_pointer + 1;
         end
+        //  Data output assigned at read pointer index. This should use a dual-clock RAM.
+        //I am assuming this CDC is OK since virtually all reference for a dual-clock RAM handle it this way.
+        rd_data_o <= mem[rd_pointer[PTR_SIZE-1:0]];
     end
 end
 
